@@ -22,16 +22,14 @@ defmodule CMS do
     end
   end
 
-  def get(mod, primary_key) do
-    CacheServer.fetch(mod, primary_key)
-
-    # TODO handle no table
-  end
-
   def get_by(mod, [{name, value}]) do
     case CacheServer.fetch(lookup_table(mod, name), value) do
       {:ok, primary_key} ->
-        get(mod, primary_key)
+        {:ok, item} = CacheServer.fetch(mod, primary_key)
+        {:ok, item}
+
+      {:error, :not_found} ->
+        {:error, :not_found}
     end
 
     # TODO handle no table

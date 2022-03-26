@@ -13,10 +13,11 @@ defmodule CMSTest do
       :ok
     end
 
-    test "get_by" do
+    test "get_by from cache" do
       CMS.update(Page)
 
       assert {:ok, %{_id: "page-1"}} = CMS.get_by(Page, path: "/")
+      assert {:error, :not_found} = CMS.get_by(Page, path: "/not-found")
     end
 
     test "update" do
