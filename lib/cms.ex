@@ -56,8 +56,21 @@ defmodule CMS do
     # TODO
   end
 
-  # TODO validate opts: range
+  @list_by_opts_validation [
+    range: [
+      type: {:custom, __MODULE__, :validate_range, []}
+    ]
+  ]
+
+  @doc """
+  TODO
+
+  ## Examples
+
+  #{NimbleOptions.docs(@list_by_opts_validation)}
+  """
   def list_by(mod, name, opts \\ []) do
+    opts = NimbleOptions.validate!(opts, @list_by_opts_validation)
     list_table = list_table(mod, name)
 
     case CacheServer.fetch(list_table, 0) do
@@ -77,7 +90,11 @@ defmodule CMS do
         []
 
       {:error, :no_table} ->
-        # TODO explain
+        # Results not cached so we need to make a request to the CMS to fetch them. The efficient
+        # way to do this would be to add a mod.list_by callback that queries the CMS such that the
+        # CMS will return the results sorted and paginated. I'm not worried about optimizing this
+        # since all results will come from the cache in production. Instead, fetch all results and
+        # paginate them manually in this function.
         all_items = mod.order_by(name, mod.list())
 
         case Keyword.fetch(opts, :range) do
@@ -86,6 +103,10 @@ defmodule CMS do
         end
     end
   end
+
+  @doc false
+  def validate_range(%Range{} = range), do: {:ok, range}
+  def validate_range(value), do: {:error, "not a range: #{inspect(value)}"}
 
   # TODO opts: cast_update_to_nodes
   def update(mod, _opts \\ []) do

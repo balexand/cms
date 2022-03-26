@@ -57,7 +57,7 @@ defmodule CMSTest do
       assert [%{_id: "page-2"}, %{_id: "page-1"}, %{_id: "page-3"}] =
                CMS.list_by(Page, :display_order)
 
-      assert [%{_id: "page-2"}] = CMS.list_by(Page, :display_order, range: [0])
+      assert [%{_id: "page-2"}] = CMS.list_by(Page, :display_order, range: 0..0)
       assert [%{_id: "page-2"}, %{_id: "page-1"}] = CMS.list_by(Page, :display_order, range: 0..1)
 
       assert [%{_id: "page-2"}, %{_id: "page-1"}, %{_id: "page-3"}] =
@@ -81,6 +81,12 @@ defmodule CMSTest do
 
       assert [%{_id: "page-1"}, %{_id: "page-3"}] =
                CMS.list_by(Page, :display_order, range: 1..1000)
+    end
+
+    test "list_by opts validation" do
+      assert_raise NimbleOptions.ValidationError, "not a range: \"invalid\"", fn ->
+        CMS.list_by(Page, :display_order, range: "invalid")
+      end
     end
 
     test "update" do
