@@ -10,13 +10,6 @@ defmodule CMSTest.MinimalResource do
     ]
   end
 
-  # TODO optional when there are no order/pagination keys
-  @impl true
-  def order_by(_key) do
-    # TODO [published_at_desc: &Enum.chunk_by(&1, 10)]
-    []
-  end
-
   @impl true
   def primary_key(item), do: item._id
 end

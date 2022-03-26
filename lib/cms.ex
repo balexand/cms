@@ -6,7 +6,7 @@ defmodule CMS do
   @callback order_by(atom()) :: [any()]
   @callback primary_key(map()) :: atom()
 
-  @optional_callbacks fetch_by: 1, lookup_key: 2
+  @optional_callbacks fetch_by: 1, lookup_key: 2, order_by: 1
 
   alias CMS.CacheServer
 
