@@ -56,13 +56,11 @@ defmodule CMS do
     # TODO
   end
 
-  # TODO validate opts: order, page
+  # TODO validate opts: range
   def list_by(mod, name, opts \\ []) do
     list_table = list_table(mod, name)
 
     case CacheServer.fetch(list_table, 0) do
-      # TODO table not found
-
       {:ok, _} ->
         Keyword.get(opts, :range, Stream.unfold(0, &{&1, &1 + 1}))
         |> Stream.map(fn i -> CacheServer.fetch(list_table, i) end)
@@ -77,6 +75,15 @@ defmodule CMS do
 
       {:error, :not_found} ->
         []
+
+      {:error, :no_table} ->
+        # TODO explain
+        all_items = mod.order_by(name, mod.list())
+
+        case Keyword.fetch(opts, :range) do
+          {:ok, range} -> Enum.slice(all_items, range)
+          :error -> all_items
+        end
     end
   end
 

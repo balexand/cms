@@ -73,6 +73,16 @@ defmodule CMSTest do
       assert CMS.list_by(Page, :display_order) == []
     end
 
+    test "list_by not cached" do
+      assert [%{_id: "page-2"}, %{_id: "page-1"}, %{_id: "page-3"}] =
+               CMS.list_by(Page, :display_order)
+
+      assert [%{_id: "page-2"}, %{_id: "page-1"}] = CMS.list_by(Page, :display_order, range: 0..1)
+
+      assert [%{_id: "page-1"}, %{_id: "page-3"}] =
+               CMS.list_by(Page, :display_order, range: 1..1000)
+    end
+
     test "update" do
       CMS.update(Page)
 
