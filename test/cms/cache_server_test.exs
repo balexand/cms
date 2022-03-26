@@ -1,6 +1,5 @@
 defmodule CMS.CacheServerTest do
   use ExUnit.Case, async: true
-  doctest CMS.CacheServer, import: true
 
   alias CMS.CacheServer
 

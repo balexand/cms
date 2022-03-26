@@ -42,7 +42,7 @@ defmodule CMS.CacheServer do
 
   ## Examples
 
-      iex> delete_table(:nonexistent_doctest_table)
+      iex> delete_table(:nonexistent_table)
       {:error, :no_table}
 
   """
@@ -75,7 +75,7 @@ defmodule CMS.CacheServer do
 
   ## Examples
 
-      iex> put_table(:doctest_table, [{"key", "value"}])
+      iex> put_table(:my_table, [{"key", "value"}])
       :ok
   """
   def put_table(pid \\ @default_name, table, pairs)
