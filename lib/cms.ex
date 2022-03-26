@@ -6,10 +6,21 @@ defmodule CMS do
   @callback order_by(atom()) :: [any()]
   @callback primary_key(map()) :: atom()
 
+  @optional_callbacks fetch_by: 1, lookup_key: 2
+
   alias CMS.CacheServer
 
+  @using_opts_validation [
+    lookup_keys: [
+      type: {:list, :atom},
+      default: []
+    ]
+  ]
+
   defmacro __using__(opts) do
-    quote bind_quoted: [opts: opts] do
+    quote do
+      opts = NimbleOptions.validate!(unquote(opts), unquote(@using_opts_validation))
+
       @behaviour CMS
 
       @cms_lookup_keys Keyword.fetch!(opts, :lookup_keys)
@@ -75,7 +86,7 @@ defmodule CMS do
   defp lookup_table(mod, name) do
     unless name in mod.__cms_lookup_keys__() do
       raise ArgumentError,
-            "invalid lookup key: #{inspect(name)} was not specified in `lookup_keys` when `use CMS` was called"
+            "invalid lookup key #{inspect(name)}; allowed values are #{inspect(mod.__cms_lookup_keys__())}"
     end
 
     :"#{mod}.#{name}"

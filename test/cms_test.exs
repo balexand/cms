@@ -3,10 +3,24 @@ defmodule CMSTest do
   doctest CMS
 
   alias CMS.CacheServer
-  alias CMSTest.Page
+  alias CMSTest.{MinimalResource, Page}
 
   import Mox, only: [verify_on_exit!: 1]
   setup :verify_on_exit!
+
+  describe "CMSTest.MinimalResource" do
+    test "get_by" do
+      assert_raise ArgumentError,
+                   "invalid lookup key :path; allowed values are []",
+                   fn -> CMS.get_by(MinimalResource, path: "/") end
+    end
+
+    test "update" do
+      CMS.update(MinimalResource)
+
+      assert CacheServer.fetch(MinimalResource, "item-2") == {:ok, %{_id: "item-2"}}
+    end
+  end
 
   describe "CMSTest.Page" do
     setup do
@@ -33,7 +47,7 @@ defmodule CMSTest do
 
     test "get_by with invalid table name" do
       assert_raise ArgumentError,
-                   "invalid lookup key: :invalid_key was not specified in `lookup_keys` when `use CMS` was called",
+                   "invalid lookup key :invalid_key; allowed values are [:path]",
                    fn -> CMS.get_by(Page, invalid_key: "/") end
     end
 
