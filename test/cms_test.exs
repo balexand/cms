@@ -51,6 +51,16 @@ defmodule CMSTest do
                    fn -> CMS.get_by(Page, invalid_key: "/") end
     end
 
+    test "get_by! from cache" do
+      CMS.update(Page)
+
+      assert %{_id: "page-1"} = CMS.get_by!(Page, path: "/")
+
+      assert_raise CMS.NotFoundError, "could not find result for [path: \"invalid\"]", fn ->
+        CMS.get_by!(Page, path: "invalid")
+      end
+    end
+
     test "list_by from cache" do
       CMS.update(Page)
 

@@ -24,6 +24,7 @@ defmodule CMS.MixProject do
   defp deps do
     [
       {:nimble_options, "~> 0.4.0"},
+      {:plug, "~> 1.0", optional: true},
 
       # dev/test
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},

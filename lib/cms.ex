@@ -8,7 +8,7 @@ defmodule CMS do
 
   @optional_callbacks fetch_by: 1, lookup_key: 2, order_by: 2
 
-  alias CMS.CacheServer
+  alias CMS.{CacheServer, NotFoundError}
 
   @using_opts_validation [
     list_keys: [
@@ -52,8 +52,11 @@ defmodule CMS do
     end
   end
 
-  def get_by!(_mod, _pair) do
-    # TODO
+  def get_by!(mod, pair) do
+    case get_by(mod, pair) do
+      {:ok, value} -> value
+      {:error, :not_found} -> raise NotFoundError, "could not find result for #{inspect(pair)}"
+    end
   end
 
   @list_by_opts_validation [
