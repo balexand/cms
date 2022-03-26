@@ -73,7 +73,11 @@ defmodule CMS do
   end
 
   defp lookup_table(mod, name) do
-    # TODO should raise if invalid name is passed
+    unless name in mod.__cms_lookup_keys__() do
+      raise ArgumentError,
+            "invalid lookup key: #{inspect(name)} was not specified in `lookup_keys` when `use CMS` was called"
+    end
+
     :"#{mod}.#{name}"
   end
 end

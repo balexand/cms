@@ -31,6 +31,12 @@ defmodule CMSTest do
       assert CMS.get_by(Page, path: "/") == {:ok, %{_id: "x"}}
     end
 
+    test "get_by with invalid table name" do
+      assert_raise ArgumentError,
+                   "invalid lookup key: :invalid_key was not specified in `lookup_keys` when `use CMS` was called",
+                   fn -> CMS.get_by(Page, invalid_key: "/") end
+    end
+
     test "update" do
       CMS.update(Page)
 
