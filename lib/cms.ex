@@ -95,8 +95,6 @@ defmodule CMS do
         {lookup_table(mod, name), lookup_pairs}
       end)
 
-    # TODO create pagination tables by calling mod.order_by
-
     list_tables =
       Enum.map(mod.__cms_list_keys__(), fn name ->
         list_pairs =
