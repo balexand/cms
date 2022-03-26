@@ -8,13 +8,9 @@ defmodule CMS.NotFoundError do
   defexception [:message]
 end
 
-case Code.ensure_compiled(Plug.Exception) do
-  {:module, _} ->
-    defimpl Plug.Exception, for: CMS.NotFoundError do
-      def status(_), do: :not_found
-      def actions(_), do: []
-    end
-
-  {:error, _} ->
-    nil
+if function_exported?(Plug, :__info__, 1) do
+  defimpl Plug.Exception, for: CMS.NotFoundError do
+    def status(_), do: :not_found
+    def actions(_), do: []
+  end
 end
