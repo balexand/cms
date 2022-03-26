@@ -1,4 +1,4 @@
-defmodule Cms.MixProject do
+defmodule CMS.MixProject do
   use Mix.Project
 
   def project do
@@ -15,7 +15,7 @@ defmodule Cms.MixProject do
   def application do
     [
       extra_applications: [:logger],
-      mod: {Cms.Application, []}
+      mod: {CMS.Application, []}
     ]
   end
 
