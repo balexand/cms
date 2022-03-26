@@ -1,18 +1,43 @@
 defmodule CMS do
+  # TODO review callbacks; do we need to use map() or can we use any()
   @callback fetch_by(Keyword.t()) :: map()
   @callback list() :: [map()]
   @callback list(Keyword.t()) :: [map()]
-  @callback lookup_keys() :: Keyword.t()
+  @callback lookup_key(atom(), map()) :: any()
   @callback order_by(atom()) :: [any()]
   @callback primary_key(map()) :: atom()
 
-  defmacro __using__(_opts) do
-    quote do
+  # @optional_callbacks
+
+  alias CMS.CacheServer
+
+  defmacro __using__(opts) do
+    quote bind_quoted: [opts: opts] do
       @behaviour CMS
+
+      @cms_lookup_keys Keyword.fetch!(opts, :lookup_keys)
+
+      @doc false
+      def __cms_lookup_keys__, do: @cms_lookup_keys
     end
   end
 
-  def get_by(_mod, _pair) do
+  def get(mod, primary_key) do
+    CacheServer.fetch(mod, primary_key)
+
+    # TODO handle no table
+  end
+
+  def get_by(mod, [{name, value}]) do
+    case CacheServer.fetch(lookup_table(mod, name), value) do
+      {:ok, primary_key} ->
+        get(mod, primary_key)
+    end
+
+    # TODO handle no table
+  end
+
+  def get_by!(_mod, _pair) do
     # TODO
   end
 
@@ -25,11 +50,35 @@ defmodule CMS do
   end
 
   # TODO opts: cast_update_to_nodes
-  def update(_mod, _opts \\ []) do
-    # TODO items = mod.list()
-    # TODO create pairs by calling mod.primary_key on each item
+  def update(mod, _opts \\ []) do
+    items = mod.list()
+
+    pairs = Enum.map(items, fn item -> {mod.primary_key(item), item} end)
+
+    lookup_tables =
+      Enum.map(mod.__cms_lookup_keys__(), fn name ->
+        lookup_pairs =
+          Enum.map(pairs, fn {primary_key, item} ->
+            {mod.lookup_key(name, item), primary_key}
+          end)
+
+        {lookup_table(mod, name), lookup_pairs}
+      end)
+
     # TODO create lookup tables by calling mod.lookup_keys
     # TODO create pagination tables by calling mod.order_by
-    # TODO send all tables to CacheServer in single call/cast
+
+    # TODO send all tables in one request
+    # TODO cast tables to all nodes
+    CacheServer.put_table(mod, pairs)
+
+    Enum.each(lookup_tables, fn {name, pairs} ->
+      CacheServer.put_table(name, pairs)
+    end)
+  end
+
+  defp lookup_table(mod, name) do
+    # TODO should raise if invalid name is passed
+    :"#{mod}.#{name}"
   end
 end
