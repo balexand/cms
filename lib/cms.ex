@@ -1,12 +1,12 @@
 defmodule CMS do
-  @callback fetch_by(Keyword.t()) :: Map.t()
-  @callback list() :: [Map.t()]
-  @callback list(Keyword.t()) :: [Map.t()]
+  @callback fetch_by(Keyword.t()) :: map()
+  @callback list() :: [map()]
+  @callback list(Keyword.t()) :: [map()]
   @callback lookup_keys() :: Keyword.t()
-  @callback pagination_keys() :: Keyword.t()
-  @callback primary_key(Map.t()) :: atom()
+  @callback order_by(atom()) :: [any()]
+  @callback primary_key(map()) :: atom()
 
-  defmacro __using__([]) do
+  defmacro __using__(_opts) do
     quote do
       @behaviour CMS
     end
@@ -29,7 +29,7 @@ defmodule CMS do
     # TODO items = mod.list()
     # TODO create pairs by calling mod.primary_key on each item
     # TODO create lookup tables by calling mod.lookup_keys
-    # TODO create pagination tables by calling mod.pagination_keys
+    # TODO create pagination tables by calling mod.order_by
     # TODO send all tables to CacheServer in single call/cast
   end
 end
