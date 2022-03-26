@@ -7,7 +7,9 @@ defmodule CMS.Application do
 
   @impl true
   def start(_type, _args) do
-    children = []
+    children = [
+      {CMS.CacheServer, name: CMS.CacheServer}
+    ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
