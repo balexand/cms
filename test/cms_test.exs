@@ -51,11 +51,39 @@ defmodule CMSTest do
                    fn -> CMS.get_by(Page, invalid_key: "/") end
     end
 
+    test "list_by from cache" do
+      CMS.update(Page)
+
+      assert [%{_id: "page-2"}, %{_id: "page-1"}, %{_id: "page-3"}] =
+               CMS.list_by(Page, :display_order)
+
+      assert [%{_id: "page-2"}] = CMS.list_by(Page, :display_order, range: [0])
+      assert [%{_id: "page-2"}, %{_id: "page-1"}] = CMS.list_by(Page, :display_order, range: 0..1)
+
+      assert [%{_id: "page-2"}, %{_id: "page-1"}, %{_id: "page-3"}] =
+               CMS.list_by(Page, :display_order, range: 0..200)
+
+      assert [%{_id: "page-3"}] = CMS.list_by(Page, :display_order, range: 2..2)
+    end
+
+    test "list_by from empty cache" do
+      CMS.update(Page)
+      CacheServer.put_table(Page.ListByDisplayOrder, [])
+
+      assert CMS.list_by(Page, :display_order) == []
+    end
+
     test "update" do
       CMS.update(Page)
 
       assert {:ok, %{_id: "page-1"}} = CacheServer.fetch(Page, "page-1")
-      assert {:ok, "page-1"} = CacheServer.fetch(:"Elixir.CMSTest.Page.path", "/")
+
+      assert CacheServer.fetch(Page.ListByDisplayOrder, 0) == {:ok, "page-2"}
+      assert CacheServer.fetch(Page.ListByDisplayOrder, 1) == {:ok, "page-1"}
+      assert CacheServer.fetch(Page.ListByDisplayOrder, 2) == {:ok, "page-3"}
+      assert CacheServer.fetch(Page.ListByDisplayOrder, 3) == {:error, :not_found}
+
+      assert CacheServer.fetch(Page.ByPath, "/") == {:ok, "page-1"}
     end
   end
 end

@@ -1,11 +1,8 @@
 defmodule CMSTest.Page do
-  use CMS, lookup_keys: [:path]
+  use CMS, list_keys: [:display_order], lookup_keys: [:path]
 
-  # TODO optional when there are no lookup keys
   @impl true
-  def fetch_by([{:path, path}]) do
-    MockCMSClient.fetch(path: path)
-  end
+  def fetch_by([{:path, path}]), do: MockCMSClient.fetch(path: path)
 
   @impl true
   def list do
@@ -13,29 +10,33 @@ defmodule CMSTest.Page do
     [
       %{
         _id: "page-1",
+        display_order: 2,
         path: %{
           current: "/"
         }
       },
       %{
         _id: "page-2",
+        display_order: 1,
         path: %{
           current: "/page"
+        }
+      },
+      %{
+        _id: "page-3",
+        display_order: 3,
+        path: %{
+          current: "/page-3"
         }
       }
     ]
   end
 
-  # TODO optional when there are no lookup keys
   @impl true
   def lookup_key(:path, item), do: item.path.current
 
-  # TODO optional when there are no order/pagination keys
   @impl true
-  def order_by(_key) do
-    # TODO [published_at_desc: &Enum.chunk_by(&1, 10)]
-    []
-  end
+  def order_by(:display_order, items), do: Enum.sort_by(items, & &1.display_order)
 
   @impl true
   def primary_key(item), do: item._id
