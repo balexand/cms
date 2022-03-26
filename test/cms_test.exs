@@ -1,5 +1,5 @@
 defmodule CMSTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case
   doctest CMS
 
   alias CMS.CacheServer
@@ -7,17 +7,22 @@ defmodule CMSTest do
 
   describe "CMSTest.Page" do
     setup do
-      CMS.update(Page)
+      CacheServer.table_names()
+      |> Enum.each(&CacheServer.delete_table/1)
+
       :ok
     end
 
     test "get_by" do
+      CMS.update(Page)
+
       assert {:ok, %{_id: "page-1"}} = CMS.get_by(Page, path: "/")
     end
 
     test "update" do
-      assert {:ok, %{_id: "page-1"}} = CacheServer.fetch(Page, "page-1")
+      CMS.update(Page)
 
+      assert {:ok, %{_id: "page-1"}} = CacheServer.fetch(Page, "page-1")
       assert {:ok, "page-1"} = CacheServer.fetch(:"Elixir.CMSTest.Page.path", "/")
     end
   end
