@@ -1,13 +1,14 @@
 defmodule CMSTest.Page do
   use CMS, lookup_keys: [:path]
 
+  # TODO optional when there are no lookup keys
   @impl true
   def fetch_by([{:path, path}]) do
     MockCMSClient.fetch(path: path)
   end
 
   @impl true
-  def list(_opts \\ []) do
+  def list do
     # items returned by API call to headless CMS
     [
       %{
@@ -29,7 +30,7 @@ defmodule CMSTest.Page do
   @impl true
   def lookup_key(:path, item), do: item.path.current
 
-  # TODO optional: defaults to []
+  # TODO optional when there are no order/pagination keys
   @impl true
   def order_by(_key) do
     # TODO [published_at_desc: &Enum.chunk_by(&1, 10)]

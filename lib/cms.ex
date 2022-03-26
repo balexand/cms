@@ -2,12 +2,9 @@ defmodule CMS do
   # TODO review callbacks; do we need to use map() or can we use any()
   @callback fetch_by(Keyword.t()) :: {:ok, map()} | {:error, :not_found}
   @callback list() :: [map()]
-  @callback list(Keyword.t()) :: [map()]
   @callback lookup_key(atom(), map()) :: any()
   @callback order_by(atom()) :: [any()]
   @callback primary_key(map()) :: atom()
-
-  # @optional_callbacks
 
   alias CMS.CacheServer
 
@@ -41,7 +38,7 @@ defmodule CMS do
   end
 
   # TODO opts: order, page
-  def list(_mod, _opts \\ []) do
+  def list_by(_mod, _opts \\ []) do
     # TODO order is required if page is specified
     # TODO assert that order is one of supported values
 
@@ -64,7 +61,6 @@ defmodule CMS do
         {lookup_table(mod, name), lookup_pairs}
       end)
 
-    # TODO create lookup tables by calling mod.lookup_keys
     # TODO create pagination tables by calling mod.order_by
 
     # TODO send all tables in one request
