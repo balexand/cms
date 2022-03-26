@@ -57,4 +57,20 @@ defmodule CMS.CacheServerTest do
 
     assert CacheServer.fetch(pid, :casted_table, "/") == {:ok, "home page"}
   end
+
+  test "table_names", %{pid: pid} do
+    assert CacheServer.table_names(pid) == []
+
+    CacheServer.put_table(pid, :table_1, %{my_key: "value"})
+    CacheServer.put_table(pid, :table_2, %{my_key: "value"})
+
+    assert CacheServer.table_names(pid) == [:table_1, :table_2]
+
+    CacheServer.delete_table(pid, :table_2)
+
+    assert CacheServer.table_names(pid) == [:table_1]
+
+    CacheServer.delete_table(pid, :table_1)
+    assert CacheServer.table_names(pid) == []
+  end
 end

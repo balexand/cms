@@ -8,6 +8,10 @@ defmodule CMS.CacheServer do
 
   @default_name __MODULE__
 
+  defmodule State do
+    defstruct table_names: MapSet.new()
+  end
+
   ###
   # Client API
   ###
@@ -19,6 +23,7 @@ defmodule CMS.CacheServer do
     GenServer.start_link(__MODULE__, nil, opts)
   end
 
+  # TODO consider deleting cast_put_table
   @doc """
   Like `put_table/3`, except uses `GenServer.cast/2`.
   """
@@ -83,6 +88,13 @@ defmodule CMS.CacheServer do
     GenServer.call(pid, {:put_table, table, pairs})
   end
 
+  @doc """
+  Returns a list of ETS table names managed by the cache.
+  """
+  def table_names(pid \\ @default_name) do
+    GenServer.call(pid, :table_names)
+  end
+
   ###
   # Server API
   ###
@@ -90,13 +102,13 @@ defmodule CMS.CacheServer do
   @doc false
   @impl true
   def init(nil) do
-    {:ok, nil}
+    {:ok, %State{}}
   end
 
   @doc false
   @impl true
   def handle_call({:delete_table, table}, _from, state) do
-    {:reply, delete_if_exists(table), state}
+    {:reply, delete_if_exists(table), update_in(state.table_names, &MapSet.delete(&1, table))}
   end
 
   def handle_call({:fetch, table, key}, _from, state) do
@@ -104,20 +116,20 @@ defmodule CMS.CacheServer do
   end
 
   def handle_call({:put_table, table, pairs}, _from, state) do
-    replace_table(table, pairs)
+    {:reply, :ok, replace_table(state, table, pairs)}
+  end
 
-    {:reply, :ok, state}
+  def handle_call(:table_names, _from, state) do
+    {:reply, MapSet.to_list(state.table_names), state}
   end
 
   @doc false
   @impl true
   def handle_cast({:put_table, table, pairs}, state) do
-    replace_table(table, pairs)
-
-    {:noreply, state}
+    {:noreply, replace_table(state, table, pairs)}
   end
 
-  defp replace_table(table, pairs) do
+  defp replace_table(state, table, pairs) do
     temp_table = :"#{table}_temp_"
 
     ^temp_table = :ets.new(temp_table, [:named_table, read_concurrency: true])
@@ -125,6 +137,8 @@ defmodule CMS.CacheServer do
 
     delete_if_exists(table)
     ^table = :ets.rename(temp_table, table)
+
+    update_in(state.table_names, &MapSet.put(&1, table))
   end
 
   defp delete_if_exists(table) do
