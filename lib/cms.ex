@@ -1,6 +1,6 @@
 defmodule CMS do
   # TODO review callbacks; do we need to use map() or can we use any()
-  @callback fetch_by(Keyword.t()) :: map()
+  @callback fetch_by(Keyword.t()) :: {:ok, map()} | {:error, :not_found}
   @callback list() :: [map()]
   @callback list(Keyword.t()) :: [map()]
   @callback lookup_key(atom(), map()) :: any()
@@ -30,9 +30,10 @@ defmodule CMS do
 
       {:error, :not_found} ->
         {:error, :not_found}
-    end
 
-    # TODO handle no table
+      {:error, :no_table} ->
+        mod.fetch_by([{name, value}])
+    end
   end
 
   def get_by!(_mod, _pair) do

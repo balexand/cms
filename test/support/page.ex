@@ -2,13 +2,13 @@ defmodule CMSTest.Page do
   use CMS, lookup_keys: [:path]
 
   @impl true
-  def fetch_by(_pair) do
-    # TODO
-    %{}
+  def fetch_by([{:path, path}]) do
+    MockCMSClient.fetch(path: path)
   end
 
   @impl true
   def list(_opts \\ []) do
+    # items returned by API call to headless CMS
     [
       %{
         _id: "page-1",
