@@ -1,15 +1,29 @@
 defmodule CMS.MixProject do
   use Mix.Project
 
+  @version "0.1.0"
+
   def project do
     [
       app: :cms,
-      version: "0.1.0",
+      description:
+        "For fetching data from any headless CMS with an ETS cache for lightning fast response times.",
+      version: @version,
       elixir: "~> 1.12",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      dialyzer: [plt_add_apps: [:plug]]
+      dialyzer: [plt_add_apps: [:plug]],
+      package: [
+        licenses: ["MIT"],
+        links: %{"GitHub" => "https://github.com/balexand/cms"}
+      ],
+      docs: [
+        extras: ["README.md"],
+        main: "readme",
+        source_ref: "v#{@version}",
+        source_url: "https://github.com/balexand/cms"
+      ]
     ]
   end
 
