@@ -144,6 +144,8 @@ defmodule CMS do
     Enum.each(list_tables ++ lookup_tables, fn {name, pairs} ->
       CacheServer.put_table(name, pairs)
     end)
+
+    :ok
   end
 
   defp list_table(mod, name) do
