@@ -30,6 +30,12 @@ defmodule CMS do
       @cms_list_keys Keyword.fetch!(opts, :list_keys)
       @cms_lookup_keys Keyword.fetch!(opts, :lookup_keys)
 
+      def child_spec(opts \\ []) do
+        opts = Keyword.put(opts, :module, __MODULE__)
+
+        %{id: __MODULE__, start: {CMS.Updater, :start_link, [opts]}}
+      end
+
       @doc false
       def __cms_list_keys__, do: @cms_list_keys
 

@@ -30,6 +30,18 @@ defmodule CMSTest do
       :ok
     end
 
+    test "child_spec" do
+      assert Page.child_spec() == %{
+               id: CMSTest.Page,
+               start: {CMS.Updater, :start_link, [[module: Page]]}
+             }
+
+      assert Page.child_spec(interval: 1000) == %{
+               id: CMSTest.Page,
+               start: {CMS.Updater, :start_link, [[module: Page, interval: 1000]]}
+             }
+    end
+
     test "get_by from cache" do
       CMS.update(Page)
 
