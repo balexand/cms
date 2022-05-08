@@ -110,7 +110,7 @@ defmodule CMSTest do
 
     test "list_by with invalid name" do
       assert_raise ArgumentError,
-                   ":invalid_name is not a valid list key; available keys are [:display_order]",
+                   "invalid list key :invalid_name; allowed values are [:display_order]",
                    fn ->
                      CMS.list_by(Page, :invalid_name)
                    end

@@ -158,7 +158,7 @@ defmodule CMS do
   defp list_table(mod, name) do
     unless name in mod.__cms_list_keys__() do
       raise ArgumentError,
-            "#{inspect(name)} is not a valid list key; available keys are #{inspect(mod.__cms_list_keys__())}"
+            "invalid list key #{inspect(name)}; allowed values are #{inspect(mod.__cms_list_keys__())}"
     end
 
     :"#{mod}.ListBy#{name |> Atom.to_string() |> Macro.camelize()}"
