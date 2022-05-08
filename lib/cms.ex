@@ -44,8 +44,6 @@ defmodule CMS do
   end
 
   def get_by(mod, [{name, value}]) do
-    # TODO check that name is a valid lookup key
-
     case CacheServer.fetch(lookup_table(mod, name), value) do
       {:ok, primary_key} ->
         {:ok, item} = CacheServer.fetch(mod, primary_key)
