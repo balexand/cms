@@ -1,5 +1,4 @@
 defmodule CMS do
-  # TODO review callbacks; do we need to use map() or can we use any()
   @callback fetch_by(Keyword.t()) :: {:ok, map()} | {:error, :not_found}
   @callback list() :: [map()]
   @callback lookup_key(atom(), map()) :: any()
