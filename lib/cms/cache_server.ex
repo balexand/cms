@@ -65,13 +65,20 @@ defmodule CMS.CacheServer do
       :ok
   """
   def put_table(pid \\ @default_name, table, pairs)
-
-  def put_table(pid, table, %{} = map) when is_atom(table) do
-    put_table(pid, table, Enum.to_list(map))
+      when is_atom(table) and (is_list(pairs) or is_map(pairs)) do
+    GenServer.call(pid, {:put_table, table, pairs})
   end
 
-  def put_table(pid, table, pairs) when is_atom(table) and is_list(pairs) do
-    GenServer.call(pid, {:put_table, table, pairs})
+  @doc """
+  Like `put_table/3`, but puts multiple tables in a single call.
+
+  ## Examples
+
+      iex> put_tables(table_1: [{"key", "value"}], table_2: %{"key" => "value"})
+      :ok
+  """
+  def put_tables(pid \\ @default_name, tables) when is_list(tables) do
+    GenServer.call(pid, {:put_tables, tables})
   end
 
   @doc """
@@ -105,11 +112,24 @@ defmodule CMS.CacheServer do
     {:reply, :ok, replace_table(state, table, pairs)}
   end
 
+  def handle_call({:put_tables, tables}, _from, state) do
+    state =
+      Enum.reduce(tables, state, fn {table, pairs}, state ->
+        replace_table(state, table, pairs)
+      end)
+
+    {:reply, :ok, state}
+  end
+
   def handle_call(:table_names, _from, state) do
     {:reply, MapSet.to_list(state.table_names), state}
   end
 
-  defp replace_table(state, table, pairs) do
+  defp replace_table(state, table, pairs) when is_map(pairs) do
+    replace_table(state, table, Enum.to_list(pairs))
+  end
+
+  defp replace_table(state, table, pairs) when is_list(pairs) do
     temp_table = :"#{table}_temp_"
 
     ^temp_table = :ets.new(temp_table, [:named_table, read_concurrency: true])

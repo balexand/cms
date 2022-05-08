@@ -141,14 +141,10 @@ defmodule CMS do
         {list_table(mod, name), list_pairs}
       end)
 
-    # TODO send all tables in one request
     # TODO cast tables to all nodes
 
-    CacheServer.put_table(mod, pairs)
-
-    Enum.each(list_tables ++ lookup_tables, fn {name, pairs} ->
-      CacheServer.put_table(name, pairs)
-    end)
+    tables = [{mod, pairs}] ++ list_tables ++ lookup_tables
+    CacheServer.put_tables(tables)
 
     :ok
   end

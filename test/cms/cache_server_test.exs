@@ -1,9 +1,13 @@
 defmodule CMS.CacheServerTest do
   use ExUnit.Case, async: true
+  doctest CMS.CacheServer, import: true
 
   alias CMS.CacheServer
 
   setup do
+    CacheServer.table_names()
+    |> Enum.each(&CacheServer.delete_table/1)
+
     {:ok, pid} = CacheServer.start_link()
     %{pid: pid}
   end
@@ -42,6 +46,13 @@ defmodule CMS.CacheServerTest do
     assert CacheServer.delete_table(pid, :my_table) == :ok
 
     assert CacheServer.fetch(pid, :my_table, "anything") == {:error, :no_table}
+  end
+
+  test "create multiple tables", %{pid: pid} do
+    assert CacheServer.put_tables(pid, table_1: [{"/", "one"}], table_2: %{"/" => "two"}) == :ok
+
+    assert CacheServer.fetch(pid, :table_1, "/") == {:ok, "one"}
+    assert CacheServer.fetch(pid, :table_2, "/") == {:ok, "two"}
   end
 
   test "create with map", %{pid: pid} do

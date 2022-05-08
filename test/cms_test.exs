@@ -8,6 +8,13 @@ defmodule CMSTest do
   import Mox, only: [verify_on_exit!: 1]
   setup :verify_on_exit!
 
+  setup do
+    CacheServer.table_names()
+    |> Enum.each(&CacheServer.delete_table/1)
+
+    :ok
+  end
+
   describe "CMSTest.MinimalResource" do
     test "get_by" do
       assert_raise ArgumentError,
@@ -23,13 +30,6 @@ defmodule CMSTest do
   end
 
   describe "CMSTest.Page" do
-    setup do
-      CacheServer.table_names()
-      |> Enum.each(&CacheServer.delete_table/1)
-
-      :ok
-    end
-
     test "child_spec" do
       assert Page.child_spec() == %{
                id: CMSTest.Page,
