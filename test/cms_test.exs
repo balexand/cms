@@ -108,6 +108,14 @@ defmodule CMSTest do
                CMS.list_by(Page, :display_order, range: 1..1000)
     end
 
+    test "list_by with invalid name" do
+      assert_raise ArgumentError,
+                   ":invalid_name is not a valid list key; available keys are [:display_order]",
+                   fn ->
+                     CMS.list_by(Page, :invalid_name)
+                   end
+    end
+
     test "list_by opts validation" do
       assert_raise NimbleOptions.ValidationError, "not a range: \"invalid\"", fn ->
         CMS.list_by(Page, :display_order, range: "invalid")

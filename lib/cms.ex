@@ -80,8 +80,6 @@ defmodule CMS do
   #{NimbleOptions.docs(@list_by_opts_validation)}
   """
   def list_by(mod, name, opts \\ []) do
-    # TODO check that name is a valid list key
-
     opts = NimbleOptions.validate!(opts, @list_by_opts_validation)
     list_table = list_table(mod, name)
 
@@ -158,7 +156,10 @@ defmodule CMS do
   end
 
   defp list_table(mod, name) do
-    # TODO check valid name
+    unless name in mod.__cms_list_keys__() do
+      raise ArgumentError,
+            "#{inspect(name)} is not a valid list key; available keys are #{inspect(mod.__cms_list_keys__())}"
+    end
 
     :"#{mod}.ListBy#{name |> Atom.to_string() |> Macro.camelize()}"
   end
