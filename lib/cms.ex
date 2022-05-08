@@ -44,6 +44,8 @@ defmodule CMS do
   end
 
   def get_by(mod, [{name, value}]) do
+    # TODO check that name is a valid lookup key
+
     case CacheServer.fetch(lookup_table(mod, name), value) do
       {:ok, primary_key} ->
         {:ok, item} = CacheServer.fetch(mod, primary_key)
@@ -78,6 +80,8 @@ defmodule CMS do
   #{NimbleOptions.docs(@list_by_opts_validation)}
   """
   def list_by(mod, name, opts \\ []) do
+    # TODO check that name is a valid list key
+
     opts = NimbleOptions.validate!(opts, @list_by_opts_validation)
     list_table = list_table(mod, name)
 
@@ -116,7 +120,7 @@ defmodule CMS do
   def validate_range(%Range{} = range), do: {:ok, range}
   def validate_range(value), do: {:error, "not a range: #{inspect(value)}"}
 
-  # TODO opts: cast_update_to_nodes
+  # TODO opts: update_all_nodes
   def update(mod, _opts \\ []) do
     items = mod.list()
     pairs = Enum.map(items, fn item -> {mod.primary_key(item), item} end)
