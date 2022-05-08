@@ -23,20 +23,6 @@ defmodule CMS.CacheServer do
     GenServer.start_link(__MODULE__, nil, opts)
   end
 
-  # TODO consider deleting cast_put_table
-  @doc """
-  Like `put_table/3`, except uses `GenServer.cast/2`.
-  """
-  def cast_put_table(pid \\ @default_name, table, pairs)
-
-  def cast_put_table(pid, table, %{} = map) when is_atom(table) do
-    cast_put_table(pid, table, Enum.to_list(map))
-  end
-
-  def cast_put_table(pid, table, pairs) when is_atom(table) and is_list(pairs) do
-    GenServer.cast(pid, {:put_table, table, pairs})
-  end
-
   @doc """
   Deletes a table if it exists. Returns `:ok` or `{:error, :no_table}`.
 
@@ -121,12 +107,6 @@ defmodule CMS.CacheServer do
 
   def handle_call(:table_names, _from, state) do
     {:reply, MapSet.to_list(state.table_names), state}
-  end
-
-  @doc false
-  @impl true
-  def handle_cast({:put_table, table, pairs}, state) do
-    {:noreply, replace_table(state, table, pairs)}
   end
 
   defp replace_table(state, table, pairs) do
