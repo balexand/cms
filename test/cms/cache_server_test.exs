@@ -1,16 +1,20 @@
 defmodule CMS.CacheServerTest do
   use ExUnit.Case, async: true
+  doctest CMS.CacheServer, import: true
 
   alias CMS.CacheServer
 
   setup do
+    CacheServer.table_names()
+    |> Enum.each(&CacheServer.delete_table/1)
+
     {:ok, pid} = CacheServer.start_link()
     %{pid: pid}
   end
 
   describe "fetch" do
     setup %{pid: pid} do
-      CacheServer.put_table(pid, :my_table, [{"/", "home page"}])
+      CacheServer.put_tables(pid, my_table: [{"/", "home page"}])
 
       :ok
     end
@@ -29,12 +33,12 @@ defmodule CMS.CacheServerTest do
   end
 
   test "create, replaces, and delete table", %{pid: pid} do
-    assert CacheServer.put_table(pid, :my_table, [{"/", "one"}]) == :ok
+    assert CacheServer.put_tables(pid, my_table: [{"/", "one"}]) == :ok
 
     assert CacheServer.fetch(pid, :my_table, "/") == {:ok, "one"}
 
     # replace table
-    assert CacheServer.put_table(pid, :my_table, [{"/two", "two"}]) == :ok
+    assert CacheServer.put_tables(pid, my_table: [{"/two", "two"}]) == :ok
 
     assert CacheServer.fetch(pid, :my_table, "/") == {:error, :not_found}
     assert CacheServer.fetch(pid, :my_table, "/two") == {:ok, "two"}
@@ -44,24 +48,24 @@ defmodule CMS.CacheServerTest do
     assert CacheServer.fetch(pid, :my_table, "anything") == {:error, :no_table}
   end
 
-  test "create with map", %{pid: pid} do
-    assert CacheServer.put_table(pid, :my_table, %{my_key: "value"}) == :ok
+  test "create multiple tables", %{pid: pid} do
+    assert CacheServer.put_tables(pid, table_1: [{"/", "one"}], table_2: %{"/" => "two"}) == :ok
 
-    assert CacheServer.fetch(pid, :my_table, :my_key) == {:ok, "value"}
+    assert CacheServer.fetch(pid, :table_1, "/") == {:ok, "one"}
+    assert CacheServer.fetch(pid, :table_2, "/") == {:ok, "two"}
   end
 
-  test "cast_put_table", %{pid: pid} do
-    assert CacheServer.cast_put_table(pid, :casted_table, %{"/" => "home page"})
-    :timer.sleep(500)
+  test "create with map", %{pid: pid} do
+    assert CacheServer.put_tables(pid, my_table: %{my_key: "value"}) == :ok
 
-    assert CacheServer.fetch(pid, :casted_table, "/") == {:ok, "home page"}
+    assert CacheServer.fetch(pid, :my_table, :my_key) == {:ok, "value"}
   end
 
   test "table_names", %{pid: pid} do
     assert CacheServer.table_names(pid) == []
 
-    CacheServer.put_table(pid, :table_1, %{my_key: "value"})
-    CacheServer.put_table(pid, :table_2, %{my_key: "value"})
+    CacheServer.put_tables(pid, table_1: %{my_key: "value"})
+    CacheServer.put_tables(pid, table_2: %{my_key: "value"})
 
     assert CacheServer.table_names(pid) == [:table_1, :table_2]
 

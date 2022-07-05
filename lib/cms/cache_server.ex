@@ -7,6 +7,7 @@ defmodule CMS.CacheServer do
   use GenServer
 
   @default_name __MODULE__
+  @timeout 10_000
 
   defmodule State do
     defstruct table_names: MapSet.new()
@@ -23,20 +24,6 @@ defmodule CMS.CacheServer do
     GenServer.start_link(__MODULE__, nil, opts)
   end
 
-  # TODO consider deleting cast_put_table
-  @doc """
-  Like `put_table/3`, except uses `GenServer.cast/2`.
-  """
-  def cast_put_table(pid \\ @default_name, table, pairs)
-
-  def cast_put_table(pid, table, %{} = map) when is_atom(table) do
-    cast_put_table(pid, table, Enum.to_list(map))
-  end
-
-  def cast_put_table(pid, table, pairs) when is_atom(table) and is_list(pairs) do
-    GenServer.cast(pid, {:put_table, table, pairs})
-  end
-
   @doc """
   Deletes a table if it exists. Returns `:ok` or `{:error, :no_table}`.
 
@@ -47,7 +34,7 @@ defmodule CMS.CacheServer do
 
   """
   def delete_table(pid \\ @default_name, table) when is_atom(table) do
-    GenServer.call(pid, {:delete_table, table})
+    GenServer.call(pid, {:delete_table, table}, @timeout)
   end
 
   @doc """
@@ -62,7 +49,7 @@ defmodule CMS.CacheServer do
         # This might be a race conidition where the the GenServer process is running
         # `replace_table` and is between the ETS delete and rename calls. We should make a request
         # to the GenServer to get a race condition free result.
-        GenServer.call(pid, {:fetch, table, key})
+        GenServer.call(pid, {:fetch, table, key}, @timeout)
 
       result ->
         result
@@ -70,29 +57,26 @@ defmodule CMS.CacheServer do
   end
 
   @doc """
-  Creates or replaces a table with the given names. `pairs` must be a map or a list of key value
-  pairs like `[{:my_key, :my_value}]`.
+  Creates or replaces zero or more tables.
 
   ## Examples
 
-      iex> put_table(:my_table, [{"key", "value"}])
+      iex> put_tables(table_1: [{"key", "value"}], table_2: %{"key" => "value"})
       :ok
   """
-  def put_table(pid \\ @default_name, table, pairs)
-
-  def put_table(pid, table, %{} = map) when is_atom(table) do
-    put_table(pid, table, Enum.to_list(map))
+  def put_tables(pid \\ @default_name, tables) when is_list(tables) do
+    GenServer.call(pid, {:put_tables, tables}, @timeout)
   end
 
-  def put_table(pid, table, pairs) when is_atom(table) and is_list(pairs) do
-    GenServer.call(pid, {:put_table, table, pairs})
+  def put_tables_on_all_nodes(pid \\ @default_name, tables) when is_list(tables) do
+    GenServer.multi_call([node() | Node.list()], pid, {:put_tables, tables}, @timeout)
   end
 
   @doc """
   Returns a list of ETS table names managed by the cache.
   """
   def table_names(pid \\ @default_name) do
-    GenServer.call(pid, :table_names)
+    GenServer.call(pid, :table_names, @timeout)
   end
 
   ###
@@ -115,21 +99,24 @@ defmodule CMS.CacheServer do
     {:reply, lookup(table, key), state}
   end
 
-  def handle_call({:put_table, table, pairs}, _from, state) do
-    {:reply, :ok, replace_table(state, table, pairs)}
+  def handle_call({:put_tables, tables}, _from, state) do
+    state =
+      Enum.reduce(tables, state, fn {table, pairs}, state ->
+        replace_table(state, table, pairs)
+      end)
+
+    {:reply, :ok, state}
   end
 
   def handle_call(:table_names, _from, state) do
     {:reply, MapSet.to_list(state.table_names), state}
   end
 
-  @doc false
-  @impl true
-  def handle_cast({:put_table, table, pairs}, state) do
-    {:noreply, replace_table(state, table, pairs)}
+  defp replace_table(state, table, pairs) when is_map(pairs) do
+    replace_table(state, table, Enum.to_list(pairs))
   end
 
-  defp replace_table(state, table, pairs) do
+  defp replace_table(state, table, pairs) when is_list(pairs) do
     temp_table = :"#{table}_temp_"
 
     ^temp_table = :ets.new(temp_table, [:named_table, read_concurrency: true])

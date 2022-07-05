@@ -8,6 +8,13 @@ defmodule CMSTest do
   import Mox, only: [verify_on_exit!: 1]
   setup :verify_on_exit!
 
+  setup do
+    CacheServer.table_names()
+    |> Enum.each(&CacheServer.delete_table/1)
+
+    :ok
+  end
+
   describe "CMSTest.MinimalResource" do
     test "get_by" do
       assert_raise ArgumentError,
@@ -23,13 +30,6 @@ defmodule CMSTest do
   end
 
   describe "CMSTest.Page" do
-    setup do
-      CacheServer.table_names()
-      |> Enum.each(&CacheServer.delete_table/1)
-
-      :ok
-    end
-
     test "child_spec" do
       assert Page.child_spec() == %{
                id: CMSTest.Page,
@@ -93,7 +93,7 @@ defmodule CMSTest do
 
     test "list_by from empty cache" do
       CMS.update(Page)
-      CacheServer.put_table(Page.ListByDisplayOrder, [])
+      CacheServer.put_tables([{Page.ListByDisplayOrder, []}])
 
       assert CMS.list_by(Page, :display_order) == []
     end
@@ -106,6 +106,14 @@ defmodule CMSTest do
 
       assert [%{_id: "page-1"}, %{_id: "page-3"}] =
                CMS.list_by(Page, :display_order, range: 1..1000)
+    end
+
+    test "list_by with invalid name" do
+      assert_raise ArgumentError,
+                   "invalid list key :invalid_name; allowed values are [:display_order]",
+                   fn ->
+                     CMS.list_by(Page, :invalid_name)
+                   end
     end
 
     test "list_by opts validation" do
