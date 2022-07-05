@@ -14,7 +14,7 @@ defmodule CMS.CacheServerTest do
 
   describe "fetch" do
     setup %{pid: pid} do
-      CacheServer.put_table(pid, :my_table, [{"/", "home page"}])
+      CacheServer.put_tables(pid, my_table: [{"/", "home page"}])
 
       :ok
     end
@@ -33,12 +33,12 @@ defmodule CMS.CacheServerTest do
   end
 
   test "create, replaces, and delete table", %{pid: pid} do
-    assert CacheServer.put_table(pid, :my_table, [{"/", "one"}]) == :ok
+    assert CacheServer.put_tables(pid, my_table: [{"/", "one"}]) == :ok
 
     assert CacheServer.fetch(pid, :my_table, "/") == {:ok, "one"}
 
     # replace table
-    assert CacheServer.put_table(pid, :my_table, [{"/two", "two"}]) == :ok
+    assert CacheServer.put_tables(pid, my_table: [{"/two", "two"}]) == :ok
 
     assert CacheServer.fetch(pid, :my_table, "/") == {:error, :not_found}
     assert CacheServer.fetch(pid, :my_table, "/two") == {:ok, "two"}
@@ -56,7 +56,7 @@ defmodule CMS.CacheServerTest do
   end
 
   test "create with map", %{pid: pid} do
-    assert CacheServer.put_table(pid, :my_table, %{my_key: "value"}) == :ok
+    assert CacheServer.put_tables(pid, my_table: %{my_key: "value"}) == :ok
 
     assert CacheServer.fetch(pid, :my_table, :my_key) == {:ok, "value"}
   end
@@ -64,8 +64,8 @@ defmodule CMS.CacheServerTest do
   test "table_names", %{pid: pid} do
     assert CacheServer.table_names(pid) == []
 
-    CacheServer.put_table(pid, :table_1, %{my_key: "value"})
-    CacheServer.put_table(pid, :table_2, %{my_key: "value"})
+    CacheServer.put_tables(pid, table_1: %{my_key: "value"})
+    CacheServer.put_tables(pid, table_2: %{my_key: "value"})
 
     assert CacheServer.table_names(pid) == [:table_1, :table_2]
 

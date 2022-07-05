@@ -8,6 +8,7 @@ defmodule CMS do
   @optional_callbacks fetch_by: 1, lookup_key: 2, order_by: 2
 
   alias CMS.{CacheServer, NotFoundError}
+  require Logger
 
   @using_opts_validation [
     list_keys: [
@@ -73,7 +74,7 @@ defmodule CMS do
   @doc """
   TODO
 
-  ## Examples
+  ## Options
 
   #{NimbleOptions.docs(@list_by_opts_validation)}
   """
@@ -117,7 +118,25 @@ defmodule CMS do
   def validate_range(value), do: {:error, "not a range: #{inspect(value)}"}
 
   # TODO opts: update_all_nodes
-  def update(mod, _opts \\ []) do
+
+  @update_opts_validation [
+    update_all_nodes: [
+      type: :boolean,
+      default: false,
+      doc: "If `true` then update will be sent to all Erlang nodes in cluster."
+    ]
+  ]
+
+  @doc """
+  TODO
+
+  ## Options
+
+  #{NimbleOptions.docs(@update_opts_validation)}
+  """
+  def update(mod, opts \\ []) do
+    opts = NimbleOptions.validate!(opts, @update_opts_validation)
+
     items = mod.list()
     pairs = Enum.map(items, fn item -> {mod.primary_key(item), item} end)
 
@@ -141,12 +160,25 @@ defmodule CMS do
         {list_table(mod, name), list_pairs}
       end)
 
-    # TODO cast tables to all nodes
-
     tables = [{mod, pairs}] ++ list_tables ++ lookup_tables
-    CacheServer.put_tables(tables)
 
-    :ok
+    if Keyword.fetch!(opts, :update_all_nodes) do
+      Logger.info("updating CMS content on all nodes")
+
+      case CacheServer.put_tables_on_all_nodes(tables) do
+        {_, []} ->
+          :ok
+
+        {_, bad_nodes} ->
+          Logger.error("failed to update nodes: #{inspect(bad_nodes)}")
+          :error
+      end
+    else
+      Logger.info("updating CMS content on current node")
+
+      CacheServer.put_tables(tables)
+      :ok
+    end
   end
 
   defp list_table(mod, name) do

@@ -93,7 +93,7 @@ defmodule CMSTest do
 
     test "list_by from empty cache" do
       CMS.update(Page)
-      CacheServer.put_table(Page.ListByDisplayOrder, [])
+      CacheServer.put_tables([{Page.ListByDisplayOrder, []}])
 
       assert CMS.list_by(Page, :display_order) == []
     end

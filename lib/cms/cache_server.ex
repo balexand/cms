@@ -7,6 +7,7 @@ defmodule CMS.CacheServer do
   use GenServer
 
   @default_name __MODULE__
+  @timeout 10_000
 
   defmodule State do
     defstruct table_names: MapSet.new()
@@ -33,7 +34,7 @@ defmodule CMS.CacheServer do
 
   """
   def delete_table(pid \\ @default_name, table) when is_atom(table) do
-    GenServer.call(pid, {:delete_table, table})
+    GenServer.call(pid, {:delete_table, table}, @timeout)
   end
 
   @doc """
@@ -48,7 +49,7 @@ defmodule CMS.CacheServer do
         # This might be a race conidition where the the GenServer process is running
         # `replace_table` and is between the ETS delete and rename calls. We should make a request
         # to the GenServer to get a race condition free result.
-        GenServer.call(pid, {:fetch, table, key})
+        GenServer.call(pid, {:fetch, table, key}, @timeout)
 
       result ->
         result
@@ -56,21 +57,7 @@ defmodule CMS.CacheServer do
   end
 
   @doc """
-  Creates or replaces a table with the given names. `pairs` must be a map or a list of key value
-  pairs like `[{:my_key, :my_value}]`.
-
-  ## Examples
-
-      iex> put_table(:my_table, [{"key", "value"}])
-      :ok
-  """
-  def put_table(pid \\ @default_name, table, pairs)
-      when is_atom(table) and (is_list(pairs) or is_map(pairs)) do
-    GenServer.call(pid, {:put_table, table, pairs})
-  end
-
-  @doc """
-  Like `put_table/3`, but puts multiple tables in a single call.
+  Creates or replaces zero or more tables.
 
   ## Examples
 
@@ -78,14 +65,18 @@ defmodule CMS.CacheServer do
       :ok
   """
   def put_tables(pid \\ @default_name, tables) when is_list(tables) do
-    GenServer.call(pid, {:put_tables, tables})
+    GenServer.call(pid, {:put_tables, tables}, @timeout)
+  end
+
+  def put_tables_on_all_nodes(pid \\ @default_name, tables) when is_list(tables) do
+    GenServer.multi_call([node() | Node.list()], pid, {:put_tables, tables}, @timeout)
   end
 
   @doc """
   Returns a list of ETS table names managed by the cache.
   """
   def table_names(pid \\ @default_name) do
-    GenServer.call(pid, :table_names)
+    GenServer.call(pid, :table_names, @timeout)
   end
 
   ###
@@ -106,10 +97,6 @@ defmodule CMS.CacheServer do
 
   def handle_call({:fetch, table, key}, _from, state) do
     {:reply, lookup(table, key), state}
-  end
-
-  def handle_call({:put_table, table, pairs}, _from, state) do
-    {:reply, :ok, replace_table(state, table, pairs)}
   end
 
   def handle_call({:put_tables, tables}, _from, state) do
