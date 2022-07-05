@@ -9,7 +9,7 @@ defmodule CMS.MixProject do
       description:
         "For fetching data from any headless CMS with an ETS cache for lightning fast response times.",
       version: @version,
-      elixir: "~> 1.12",
+      elixir: "~> 1.13",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
