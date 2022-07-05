@@ -72,7 +72,7 @@ defmodule CMS do
   ]
 
   @doc """
-  TODO
+  TODO docs
 
   ## Options
 
@@ -117,8 +117,6 @@ defmodule CMS do
   def validate_range(%Range{} = range), do: {:ok, range}
   def validate_range(value), do: {:error, "not a range: #{inspect(value)}"}
 
-  # TODO opts: update_all_nodes
-
   @update_opts_validation [
     update_all_nodes: [
       type: :boolean,
@@ -128,7 +126,7 @@ defmodule CMS do
   ]
 
   @doc """
-  TODO
+  TODO docs
 
   ## Options
 
