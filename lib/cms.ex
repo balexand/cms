@@ -2,7 +2,9 @@ defmodule CMS do
   @moduledoc """
   TODO
 
-  ## Example
+  ## Examples
+
+  ### Lookup a page by path
 
       defmodule MyApp.Page do
         use CMS, lookup_keys: [:path]
@@ -41,6 +43,43 @@ defmodule CMS do
         @impl true
         def primary_key(item), do: item._id
       end
+
+  To look up a page by path:
+
+      iex> CMS.get_by!(MyApp.Page, path: "/")
+      %{_id: "page-1", display_order: 2, path: %{current: "/"}}
+
+  ### List blog posts
+
+      defmodule MyApp.Post do
+        use CMS, list_keys: [:display_order]
+
+        @impl true
+        def list do
+          # Make an API call to the headless CMS and return document...
+          [
+            %{
+              _id: "post-1",
+              display_order: 2
+            },
+            %{
+              _id: "post-2",
+              display_order: 1
+            }
+          ]
+        end
+
+        @impl true
+        def order_by(:display_order, items), do: Enum.sort_by(items, & &1.display_order)
+
+        @impl true
+        def primary_key(item), do: item._id
+      end
+
+  To list pages:
+
+      iex> CMS.list_by(MyApp.Post, :display_order)
+      [%{_id: "post-2", display_order: 1}, %{_id: "post-1", display_order: 2}]
   """
 
   @doc """
@@ -58,12 +97,14 @@ defmodule CMS do
   @callback list() :: [map()]
 
   @doc """
-  Returns the lookup key for a document given a key name and a CMS document.
+  Returns the lookup key for a document given a key name and a CMS document. Only required if you
+  will be looking up documents by key. See `CMS.get_by/2` and `CMS.get_by!/2`.
   """
   @callback lookup_key(atom(), map()) :: any()
 
   @doc """
-  TODO
+  Orders documents by list key. Only required if you will be listing documents using
+  `CMS.list_by/3`.
   """
   @callback order_by(atom(), [map()]) :: [any()]
 
