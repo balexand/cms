@@ -1,6 +1,6 @@
-# Cms
+# CMS
 
-**TODO: Add description**
+For fetching data from any headless CMS with an ETS cache for lightning fast response times.
 
 ## Installation
 
