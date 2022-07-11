@@ -1,6 +1,6 @@
-# Cms
+# CMS
 
-**TODO: Add description**
+For fetching data from any headless CMS with an ETS cache for lightning fast response times.
 
 ## Installation
 
@@ -15,6 +15,6 @@ def deps do
 end
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/cms>.
+## Usage
+
+TODO

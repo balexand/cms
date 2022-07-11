@@ -1,8 +1,116 @@
 defmodule CMS do
+  @moduledoc """
+  TODO
+
+  ## Examples
+
+  ### Lookup a page by path
+
+      defmodule MyApp.Page do
+        use CMS, lookup_keys: [:path]
+
+        # This is an example of what a document from Sanity CMS might look like.
+        @dummy_result %{
+          _id: "page-1",
+          display_order: 2,
+          path: %{
+            current: "/"
+          }
+        }
+
+        @impl true
+        def fetch_by([{:path, path}]) do
+          # Make an API call to the headless CMS and return document...
+
+          case path do
+            "/" -> {:ok, @dummy_result}
+            _ -> {:error, :not_found}
+          end
+        end
+
+        @impl true
+        def list do
+          # Make an API call to the headless CMS and return documents...
+          [
+            @dummy_result
+            # ...
+          ]
+        end
+
+        @impl true
+        def lookup_key(:path, item), do: item.path.current
+
+        @impl true
+        def primary_key(item), do: item._id
+      end
+
+  To look up a page by path:
+
+      iex> CMS.get_by!(MyApp.Page, path: "/")
+      %{_id: "page-1", display_order: 2, path: %{current: "/"}}
+
+  ### List blog posts
+
+      defmodule MyApp.Post do
+        use CMS, list_keys: [:display_order]
+
+        @impl true
+        def list do
+          # Make an API call to the headless CMS and return document...
+          [
+            %{
+              _id: "post-1",
+              display_order: 2
+            },
+            %{
+              _id: "post-2",
+              display_order: 1
+            }
+          ]
+        end
+
+        @impl true
+        def order_by(:display_order, items), do: Enum.sort_by(items, & &1.display_order)
+
+        @impl true
+        def primary_key(item), do: item._id
+      end
+
+  To list pages:
+
+      iex> CMS.list_by(MyApp.Post, :display_order)
+      [%{_id: "post-2", display_order: 1}, %{_id: "post-1", display_order: 2}]
+  """
+
+  @doc """
+  Fetches a single CMS document given one or more keys. Generally implementations of this callback
+  will make an API call to the headless CMS. Returns `{:ok, doc}` or `{:error, :not_found}`. This
+  callback is optional and is only needed if you intend to call `CMS.get_by/2` or `CMS.get_by!/2`
+  without having initialized the cache.
+  """
   @callback fetch_by(Keyword.t()) :: {:ok, map()} | {:error, :not_found}
+
+  @doc """
+  Returns a list of all CMS documents. Generally implementations of this callback will make an API
+  call to the headless CMS.
+  """
   @callback list() :: [map()]
+
+  @doc """
+  Returns the lookup key for a document given a key name and a CMS document. Only required if you
+  will be looking up documents by key. See `CMS.get_by/2` and `CMS.get_by!/2`.
+  """
   @callback lookup_key(atom(), map()) :: any()
+
+  @doc """
+  Orders documents by list key. Only required if you will be listing documents using
+  `CMS.list_by/3`.
+  """
   @callback order_by(atom(), [map()]) :: [any()]
+
+  @doc """
+  Returns the primary key of the given CMS document.
+  """
   @callback primary_key(map()) :: atom()
 
   @optional_callbacks fetch_by: 1, lookup_key: 2, order_by: 2
@@ -44,6 +152,9 @@ defmodule CMS do
     end
   end
 
+  @doc """
+  TODO
+  """
   def get_by(mod, [{name, value}]) do
     case CacheServer.fetch(lookup_table(mod, name), value) do
       {:ok, primary_key} ->
@@ -58,6 +169,9 @@ defmodule CMS do
     end
   end
 
+  @doc """
+  TODO
+  """
   def get_by!(mod, pair) do
     case get_by(mod, pair) do
       {:ok, value} -> value
