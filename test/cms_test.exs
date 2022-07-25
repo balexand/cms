@@ -73,7 +73,7 @@ defmodule CMSTest do
           CMS.get_by!(Page, path: "invalid")
         end
 
-      assert Plug.Exception.status(exception) == :not_found
+      assert Plug.Exception.status(exception) == 404
     end
 
     test "list_by from cache" do

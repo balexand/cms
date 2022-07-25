@@ -13,7 +13,6 @@ defmodule CMS.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      dialyzer: [plt_add_apps: [:plug]],
       package: [
         licenses: ["MIT"],
         links: %{"GitHub" => "https://github.com/balexand/cms"}
@@ -39,12 +38,12 @@ defmodule CMS.MixProject do
   defp deps do
     [
       {:nimble_options, "~> 0.4.0"},
-      {:plug, "~> 1.0", optional: true},
 
       # dev/test
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
-      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
-      {:mox, "~> 1.0", only: :test}
+      {:ex_doc, ">= 0.0.0", only: [:dev], runtime: false},
+      {:mox, "~> 1.0", only: [:test]},
+      {:plug, "~> 1.0", only: [:test]}
     ]
   end
 
