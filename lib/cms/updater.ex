@@ -16,7 +16,7 @@ defmodule CMS.Updater do
     ],
     interval: [
       type: :pos_integer,
-      default: 120_000
+      default: :timer.minutes(15)
     ],
     error_interval: [
       type: :pos_integer,
@@ -28,6 +28,13 @@ defmodule CMS.Updater do
   # Client API
   ###
 
+  @doc """
+  Starts server.
+
+  ## Options
+
+  #{NimbleOptions.docs(@init_opts_validation)}
+  """
   def start_link(opts) do
     opts = NimbleOptions.validate!(opts, @init_opts_validation)
 
