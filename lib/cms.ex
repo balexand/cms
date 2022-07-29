@@ -275,8 +275,6 @@ defmodule CMS do
     tables = [{mod, pairs}] ++ list_tables ++ lookup_tables
 
     if Keyword.fetch!(opts, :update_all_nodes) do
-      Logger.info("updating CMS content on all nodes")
-
       case CacheServer.put_tables_on_all_nodes(tables) do
         {_, []} ->
           :ok
@@ -286,8 +284,6 @@ defmodule CMS do
           :error
       end
     else
-      Logger.info("updating CMS content on current node")
-
       CacheServer.put_tables(tables)
       :ok
     end
