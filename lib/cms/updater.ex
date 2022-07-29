@@ -31,7 +31,7 @@ defmodule CMS.Updater do
   def start_link(opts) do
     opts = NimbleOptions.validate!(opts, @init_opts_validation)
 
-    GenServer.start_link(__MODULE__, opts)
+    GenServer.start_link(__MODULE__, opts, name: opts[:module])
   end
 
   ###
