@@ -1,6 +1,6 @@
 # CMS
 
-[![Package](https://img.shields.io/badge/-Package-important)](https://hex.pm/packages/cms) [![Documentation](https://img.shields.io/badge/-Documentation-blueviolet)](https://hexdocs.pm/cms)
+[![Package](https://img.shields.io/hexpm/v/cms.svg)](https://hex.pm/packages/cms) [![Documentation](http://img.shields.io/badge/hex.pm-docs-green.svg?style=flat)](https://hexdocs.pm/cms) ![CI](https://github.com/balexand/cms/actions/workflows/elixir.yml/badge.svg)
 
 For fetching data from any headless CMS with an ETS cache for lightning fast response times.
 
