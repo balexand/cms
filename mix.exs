@@ -37,7 +37,7 @@ defmodule CMS.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:nimble_options, "~> 0.4.0"},
+      {:nimble_options, "~> 0.4"},
 
       # dev/test
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},

@@ -117,9 +117,11 @@ defmodule CMSTest do
     end
 
     test "list_by opts validation" do
-      assert_raise NimbleOptions.ValidationError, "not a range: \"invalid\"", fn ->
-        CMS.list_by(Page, :display_order, range: "invalid")
-      end
+      assert_raise NimbleOptions.ValidationError,
+                   "invalid value for :range option: not a range: \"invalid\"",
+                   fn ->
+                     CMS.list_by(Page, :display_order, range: "invalid")
+                   end
     end
 
     test "update" do
