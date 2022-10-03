@@ -4,6 +4,7 @@ defmodule CMS.Updater do
   require Logger
 
   defmodule State do
+    @moduledoc false
     defstruct [:opts, :ref]
   end
 

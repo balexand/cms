@@ -10,6 +10,7 @@ defmodule CMS.CacheServer do
   @timeout 10_000
 
   defmodule State do
+    @moduledoc false
     defstruct table_names: MapSet.new()
   end
 
