@@ -1,3 +1,6 @@
+# FIXME drop list_by
+# FIXME grep list_keys
+# FIXME drop order_by
 defmodule CMS do
   @moduledoc """
   TODO
@@ -48,38 +51,6 @@ defmodule CMS do
 
       iex> CMS.get_by!(MyApp.Page, path: "/")
       %{_id: "page-1", display_order: 2, path: %{current: "/"}}
-
-  ### List blog posts
-
-      defmodule MyApp.Post do
-        use CMS, list_keys: [:display_order]
-
-        @impl true
-        def list do
-          # Make an API call to the headless CMS and return document...
-          [
-            %{
-              _id: "post-1",
-              display_order: 2
-            },
-            %{
-              _id: "post-2",
-              display_order: 1
-            }
-          ]
-        end
-
-        @impl true
-        def order_by(:display_order, items), do: Enum.sort_by(items, & &1.display_order)
-
-        @impl true
-        def primary_key(item), do: item._id
-      end
-
-  To list pages:
-
-      iex> CMS.list_by(MyApp.Post, :display_order)
-      [%{_id: "post-2", display_order: 1}, %{_id: "post-1", display_order: 2}]
   """
 
   @doc """
@@ -262,6 +233,7 @@ defmodule CMS do
         {lookup_table(mod, name), lookup_pairs}
       end)
 
+    # FIXME drop list_tables
     list_tables =
       Enum.map(mod.__cms_list_keys__(), fn name ->
         list_pairs =
