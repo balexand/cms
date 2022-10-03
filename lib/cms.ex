@@ -133,7 +133,7 @@ defmodule CMS do
     end
   end
 
-  @update_opts_validation [
+  @put_opts_validation [
     update_all_nodes: [
       type: :boolean,
       default: false,
@@ -142,16 +142,15 @@ defmodule CMS do
   ]
 
   @doc """
-  TODO docs
+  Replaces all ETS tables associated with the specified module.
 
   ## Options
 
-  #{NimbleOptions.docs(@update_opts_validation)}
+  #{NimbleOptions.docs(@put_opts_validation)}
   """
-  def update(mod, opts \\ []) do
-    opts = NimbleOptions.validate!(opts, @update_opts_validation)
+  def put(mod, items, opts \\ []) do
+    opts = NimbleOptions.validate!(opts, @put_opts_validation)
 
-    items = mod.list()
     pairs = Enum.map(items, fn item -> {mod.primary_key(item), item} end)
 
     lookup_tables =
@@ -179,6 +178,14 @@ defmodule CMS do
       CacheServer.put_tables(tables)
       :ok
     end
+  end
+
+  @doc """
+  Fetches new items by calling the `c:list/0` callback then passes resulting items to `put/3`. See
+  `put/3` for available opts.
+  """
+  def update(mod, opts \\ []) do
+    put(mod, mod.list(), opts)
   end
 
   defp lookup_table(mod, name) do
