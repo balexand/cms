@@ -1,5 +1,5 @@
 defmodule CMSTest.Page do
-  use CMS, list_keys: [:display_order], lookup_keys: [:path]
+  use CMS, lookup_keys: [:path]
 
   @impl true
   def fetch_by([{:path, path}]), do: MockCMSClient.fetch(path: path)
@@ -34,9 +34,6 @@ defmodule CMSTest.Page do
 
   @impl true
   def lookup_key(:path, item), do: item.path.current
-
-  @impl true
-  def order_by(:display_order, items), do: Enum.sort_by(items, & &1.display_order)
 
   @impl true
   def primary_key(item), do: item._id
