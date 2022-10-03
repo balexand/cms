@@ -76,63 +76,10 @@ defmodule CMSTest do
       assert Plug.Exception.status(exception) == 404
     end
 
-    test "list_by from cache" do
-      CMS.update(Page)
-
-      assert [%{_id: "page-2"}, %{_id: "page-1"}, %{_id: "page-3"}] =
-               CMS.list_by(Page, :display_order)
-
-      assert [%{_id: "page-2"}] = CMS.list_by(Page, :display_order, range: 0..0)
-      assert [%{_id: "page-2"}, %{_id: "page-1"}] = CMS.list_by(Page, :display_order, range: 0..1)
-
-      assert [%{_id: "page-2"}, %{_id: "page-1"}, %{_id: "page-3"}] =
-               CMS.list_by(Page, :display_order, range: 0..200)
-
-      assert [%{_id: "page-3"}] = CMS.list_by(Page, :display_order, range: 2..2)
-    end
-
-    test "list_by from empty cache" do
-      CMS.update(Page)
-      CacheServer.put_tables([{Page.ListByDisplayOrder, []}])
-
-      assert CMS.list_by(Page, :display_order) == []
-    end
-
-    test "list_by not cached" do
-      assert [%{_id: "page-2"}, %{_id: "page-1"}, %{_id: "page-3"}] =
-               CMS.list_by(Page, :display_order)
-
-      assert [%{_id: "page-2"}, %{_id: "page-1"}] = CMS.list_by(Page, :display_order, range: 0..1)
-
-      assert [%{_id: "page-1"}, %{_id: "page-3"}] =
-               CMS.list_by(Page, :display_order, range: 1..1000)
-    end
-
-    test "list_by with invalid name" do
-      assert_raise ArgumentError,
-                   "invalid list key :invalid_name; allowed values are [:display_order]",
-                   fn ->
-                     CMS.list_by(Page, :invalid_name)
-                   end
-    end
-
-    test "list_by opts validation" do
-      assert_raise NimbleOptions.ValidationError,
-                   "invalid value for :range option: not a range: \"invalid\"",
-                   fn ->
-                     CMS.list_by(Page, :display_order, range: "invalid")
-                   end
-    end
-
     test "update" do
       CMS.update(Page)
 
       assert {:ok, %{_id: "page-1"}} = CacheServer.fetch(Page, "page-1")
-
-      assert CacheServer.fetch(Page.ListByDisplayOrder, 0) == {:ok, "page-2"}
-      assert CacheServer.fetch(Page.ListByDisplayOrder, 1) == {:ok, "page-1"}
-      assert CacheServer.fetch(Page.ListByDisplayOrder, 2) == {:ok, "page-3"}
-      assert CacheServer.fetch(Page.ListByDisplayOrder, 3) == {:error, :not_found}
 
       assert CacheServer.fetch(Page.ByPath, "/") == {:ok, "page-1"}
     end
