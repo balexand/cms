@@ -95,6 +95,12 @@ defmodule CMS do
 
       @cms_lookup_keys Keyword.fetch!(opts, :lookup_keys)
 
+      @doc """
+      [Child spec](https://hexdocs.pm/elixir/Supervisor.html#module-child-specification) that
+      starts a `CMS.Updater` instance to fetch content for this module. The
+      [name](https://hexdocs.pm/elixir/GenServer.html#module-name-registration) of the updater
+      process will be `#{inspect(__MODULE__)}`.
+      """
       def child_spec(opts \\ []) do
         opts = Keyword.put(opts, :module, __MODULE__)
 
