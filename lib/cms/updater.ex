@@ -122,9 +122,13 @@ defmodule CMS.Updater do
     {:noreply, %{state | ref: nil}}
   end
 
-  def handle_info({:timeout, from}, state) do
+  def handle_info({:timeout, from}, %{initialized?: false} = state) do
     GenServer.reply(from, {:error, :timeout})
 
     {:noreply, %{state | awaiting_init: List.delete(state.awaiting_init, from)}}
+  end
+
+  def handle_info({:timeout, _from}, %{initialized?: true} = state) do
+    {:noreply, state}
   end
 end
