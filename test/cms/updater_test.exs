@@ -26,7 +26,7 @@ defmodule CMS.UpdaterTest do
     assert_no_extra_messages_received()
   end
 
-  test "await_initialization called after initialization", %{pid: pid} do
+  test "await_initialization instant response", %{pid: pid} do
     :timer.sleep(@timeout_plus)
 
     assert :ok == Updater.await_initialization(pid, timeout: 1)
