@@ -125,6 +125,6 @@ defmodule CMS.Updater do
   def handle_info({:timeout, from}, state) do
     GenServer.reply(from, {:error, :timeout})
 
-    {:noreply, state}
+    {:noreply, %{state | awaiting_init: List.delete(state.awaiting_init, from)}}
   end
 end
