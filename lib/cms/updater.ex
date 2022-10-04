@@ -113,7 +113,7 @@ defmodule CMS.Updater do
       GenServer.reply(from, :ok)
     end)
 
-    {:noreply, %{state | initialized?: true, ref: nil}}
+    {:noreply, %{state | awaiting_init: [], initialized?: true, ref: nil}}
   end
 
   def handle_info({:DOWN, ref, :process, _pid, _reason}, %{ref: ref} = state) do
