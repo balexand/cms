@@ -8,4 +8,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.9.0] - 2022-10-25
 ### Added
-- `CMS.all/1` ((#16)[https://github.com/balexand/cms/pull/16]).
+- `CMS.all/1` (https://github.com/balexand/cms/pull/16).
