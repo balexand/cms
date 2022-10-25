@@ -112,6 +112,17 @@ defmodule CMS do
     end
   end
 
+  def all(mod) do
+    mod.__cms_lookup_keys__()
+    # FIXME doesn't work if there are no lookup keys
+    |> hd()
+    |> CacheServer.values()
+    |> case do
+      {:ok, values} -> values
+      {:error, :no_table} -> mod.list()
+    end
+  end
+
   @doc """
   TODO
   """
