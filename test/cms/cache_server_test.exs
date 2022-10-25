@@ -35,6 +35,7 @@ defmodule CMS.CacheServerTest do
   test "create, replaces, and delete table", %{pid: pid} do
     assert CacheServer.put_tables(pid, my_table: [{"/", "one"}]) == :ok
 
+    assert CacheServer.values(pid, :my_table) == {:ok, ["one"]}
     assert CacheServer.fetch(pid, :my_table, "/") == {:ok, "one"}
 
     # replace table
@@ -75,5 +76,9 @@ defmodule CMS.CacheServerTest do
 
     CacheServer.delete_table(pid, :table_1)
     assert CacheServer.table_names(pid) == []
+  end
+
+  test "values", %{pid: pid} do
+    assert CacheServer.values(pid, :doesnt_exist) == {:error, :no_table}
   end
 end

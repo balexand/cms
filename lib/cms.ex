@@ -115,6 +115,16 @@ defmodule CMS do
   @doc """
   TODO
   """
+  def all(mod) do
+    case CacheServer.values(mod) do
+      {:ok, values} -> values
+      {:error, :no_table} -> mod.list()
+    end
+  end
+
+  @doc """
+  TODO
+  """
   def get_by(mod, [{name, value}]) do
     case CacheServer.fetch(lookup_table(mod, name), value) do
       {:ok, primary_key} ->
