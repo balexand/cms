@@ -80,18 +80,20 @@ defmodule CMS.CacheServer do
     GenServer.call(pid, :table_names, @timeout)
   end
 
+  @doc """
+  Fetches all values from the table. Returns `{:ok, values}` or `{:error, :no_table}`.
+  """
   def values(pid \\ @default_name, table) do
-    case tab2list(table) do
+    case table_values(table) do
       {:error, :no_table} ->
         # This might be a race conidition where the the GenServer process is running
         # `replace_table` and is between the ETS delete and rename calls. We should make a request
         # to the GenServer to get a race condition free result.
-        GenServer.call(pid, {:tab2list, table}, @timeout)
+        GenServer.call(pid, {:table_values, table}, @timeout)
 
       result ->
         result
     end
-    |> Enum.map(fn {_k, v} -> v end)
   end
 
   ###
@@ -123,8 +125,8 @@ defmodule CMS.CacheServer do
     {:reply, :ok, state}
   end
 
-  def handle_call({:tab2list, table}, _from, state) do
-    {:reply, tab2list(table), state}
+  def handle_call({:table_values, table}, _from, state) do
+    {:reply, table_values(table), state}
   end
 
   def handle_call(:table_names, _from, state) do
@@ -168,8 +170,8 @@ defmodule CMS.CacheServer do
       {:error, :no_table}
   end
 
-  defp tab2list(table) do
-    :ets.tab2list(table)
+  defp table_values(table) do
+    {:ok, :ets.tab2list(table) |> Enum.map(fn {_k, v} -> v end)}
   rescue
     ArgumentError ->
       {:error, :no_table}
