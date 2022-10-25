@@ -35,6 +35,7 @@ defmodule CMS.CacheServerTest do
   test "create, replaces, and delete table", %{pid: pid} do
     assert CacheServer.put_tables(pid, my_table: [{"/", "one"}]) == :ok
 
+    assert CacheServer.values(pid, :my_table) == ["one"]
     assert CacheServer.fetch(pid, :my_table, "/") == {:ok, "one"}
 
     # replace table
