@@ -94,7 +94,7 @@ defmodule CMS.Updater do
   def handle_info(:sync, state) do
     mod = Keyword.fetch!(state.opts, :module)
 
-    Logger.info("syncing #{inspect(mod)} #{inspect(state.opts)}")
+    Logger.info("syncing #{inspect(mod)}")
 
     %Task{ref: ref} =
       Task.Supervisor.async_nolink(@task_supervisor, fn ->
