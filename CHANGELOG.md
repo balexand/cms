@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.1] - 2022-10-26
+### Changed
+- Shorten log message
+
 ## [0.9.0] - 2022-10-25
 ### Added
 - `CMS.all/1` (https://github.com/balexand/cms/pull/16).
