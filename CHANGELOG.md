@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.0] - 2022-11-01
+### Added
+- Emit telemetry events (https://github.com/balexand/cms/pull/17).
+
 ## [0.9.1] - 2022-10-26
 ### Changed
 - Shorten log message
