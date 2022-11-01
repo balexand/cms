@@ -201,7 +201,11 @@ defmodule CMS do
   `put/3` for available opts.
   """
   def update(mod, opts \\ []) do
-    put(mod, mod.list(), opts)
+    metadata = %{module: mod}
+
+    :telemetry.span([:cms, :update], metadata, fn ->
+      {put(mod, mod.list(), opts), metadata}
+    end)
   end
 
   defp lookup_table(mod, name) do

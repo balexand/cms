@@ -1,8 +1,6 @@
 defmodule CMS.Updater do
   use GenServer
 
-  require Logger
-
   defmodule State do
     @moduledoc false
     defstruct awaiting_init: [],
@@ -93,8 +91,6 @@ defmodule CMS.Updater do
   @impl true
   def handle_info(:sync, state) do
     mod = Keyword.fetch!(state.opts, :module)
-
-    Logger.info("syncing #{inspect(mod)}")
 
     %Task{ref: ref} =
       Task.Supervisor.async_nolink(@task_supervisor, fn ->
