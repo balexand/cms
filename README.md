@@ -25,4 +25,4 @@ TODO
 
 The following telemetry is emitted:
 
-* `[:cms, :update, :start]`, `[:cms, :update, :stop]`, and `[:cms, :update, :exception]` - Span events for updates.
+* `[:cms, :update, :start]`, `[:cms, :update, :stop]`, and `[:cms, :update, :exception]` - Span events for CMS updates.
