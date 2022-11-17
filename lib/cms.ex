@@ -122,6 +122,27 @@ defmodule CMS do
     end
   end
 
+  def get(mod, primary_key) do
+    case CacheServer.fetch(mod, primary_key) do
+      {:error, :no_table} ->
+        update(mod)
+        CacheServer.fetch(mod, primary_key)
+
+      result ->
+        result
+    end
+  end
+
+  def get!(mod, primary_key) do
+    case get(mod, primary_key) do
+      {:ok, value} ->
+        value
+
+      {:error, :not_found} ->
+        raise NotFoundError, "could not find result with primary key #{inspect(primary_key)}"
+    end
+  end
+
   @doc """
   TODO
   """

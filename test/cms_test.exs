@@ -42,6 +42,28 @@ defmodule CMSTest do
              }
     end
 
+    test "get from cache" do
+      CMS.update(Page)
+
+      assert {:ok, %{_id: "page-1"}} = CMS.get(Page, "page-1")
+      assert {:error, :not_found} = CMS.get(Page, "page-not-found")
+    end
+
+    test "get not cached" do
+      assert {:ok, %{_id: "page-1"}} = CMS.get(Page, "page-1")
+      assert {:error, :not_found} = CMS.get(Page, "page-not-found")
+    end
+
+    test "get!" do
+      assert %{_id: "page-1"} = CMS.get!(Page, "page-1")
+
+      assert_raise CMS.NotFoundError,
+                   ~S'could not find result with primary key "page-not-found"',
+                   fn ->
+                     CMS.get!(Page, "page-not-found")
+                   end
+    end
+
     test "get_by from cache" do
       CMS.update(Page)
 
