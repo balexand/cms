@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.1] - 2023-03-11
+### Changed
+- Allow `nimble_options` 1.0
+
 ## [0.11.0] - 2022-11-17
 ### Added
 - `CMS.get/2` and `CMS.get!/2`
