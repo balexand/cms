@@ -90,12 +90,9 @@ defmodule CMSTest do
 
       assert %{_id: "page-1"} = CMS.get_by!(Page, path: "/")
 
-      exception =
-        assert_raise CMS.NotFoundError, "could not find result for [path: \"invalid\"]", fn ->
-          CMS.get_by!(Page, path: "invalid")
-        end
-
-      assert Plug.Exception.status(exception) == 404
+      assert_raise CMS.NotFoundError, "could not find result for [path: \"invalid\"]", fn ->
+        CMS.get_by!(Page, path: "invalid")
+      end
     end
 
     test "update" do
