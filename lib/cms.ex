@@ -49,7 +49,7 @@ defmodule CMS do
       iex> CMS.get_by!(MyApp.CMS.Page, path: "/")
       %{_id: "page-1", display_order: 2, path: %{current: "/"}}
 
-  To start a `GenServer` to fetch and cache results:
+  To start a `GenServer` to fetch and cache results, add `MyApp.CMS.Page` to your application:
 
       defmodule MyApp.Application do
         # See https://hexdocs.pm/elixir/Application.html
