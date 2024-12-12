@@ -6,7 +6,7 @@ defmodule CMS do
 
   ### Lookup a page by path
 
-      defmodule MyApp.Page do
+      defmodule MyApp.CMS.Page do
         use CMS, lookup_keys: [:path]
 
         # This is an example of what a document from Sanity CMS might look like.
@@ -19,7 +19,7 @@ defmodule CMS do
         }
 
         @impl true
-        def fetch_by([{:path, path}]) do
+        def fetch_by(path: path) do
           # Make an API call to the headless CMS and return document...
 
           case path do
@@ -46,8 +46,33 @@ defmodule CMS do
 
   To look up a page by path:
 
-      iex> CMS.get_by!(MyApp.Page, path: "/")
+      iex> CMS.get_by!(MyApp.CMS.Page, path: "/")
       %{_id: "page-1", display_order: 2, path: %{current: "/"}}
+
+  To start a `GenServer` to fetch and cache results:
+
+      defmodule MyApp.Application do
+        # See https://hexdocs.pm/elixir/Application.html
+        # for more information on OTP Applications
+        @moduledoc false
+
+        use Application
+
+        @impl true
+        def start(_type, _args) do
+          children = [
+            # ...
+            MyApp.CMS.Page
+          ]
+
+          # See https://hexdocs.pm/elixir/Supervisor.html
+          # for other strategies and supported options
+          opts = [strategy: :one_for_one, name: MyApp.Supervisor]
+          Supervisor.start_link(children, opts)
+        end
+
+        # ...
+      end
   """
 
   @doc """
